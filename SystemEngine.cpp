@@ -23,20 +23,27 @@ void SystemEngine::destroyInstance()
 
 void SystemEngine::onCommandReceived(QString from, QString body)
 {
-    if (body == "new")
+    if (body == "--new")
     {
         _activeUser = from;
-        _watcher->sendMessage(_activeUser, QString("New console activated for %1").arg(_activeUser));
+        _watcher->sendMessage(_activeUser, QString("---> New console activated for %1").arg(_activeUser));
     }
     else
     if (_activeUser.isEmpty())
     {
-        _watcher->sendMessage(from, QString("No console activated for %1. "
-                                            "Activate a new console with \"new\" command").arg(from));
+        _watcher->sendMessage(from, QString("---> No console activated for %1. "
+                                            "Activate a new console with \"--new\" command").arg(from));
+    }
+    else
+    if (body == "--restart")
+    {
+        _console->close();
+        _console->start();
+        _watcher->sendMessage(_activeUser, QString("---> Terminal restarted"));
     }
     else
     {
-        _console.WriteChildStdIn(body);
+        _console->WriteChildStdIn(body);
     }
 }
 
@@ -50,17 +57,21 @@ SystemEngine::SystemEngine(QObject *parent) :
 {
     setProxySettings();
 
+    _console = new SystemConsole;
+    _console->start();
+
     _watcher = new XmppTransport(SystemConfig::instance()->transportInfo());
     _watcher->connect();
 
     connect(_watcher, SIGNAL(messageReceived(QString, QString)), this, SLOT(onCommandReceived(QString,QString)));
-    connect(&_console, SIGNAL(OnChildStdErrWrite(QString)), this,  SLOT(onCommandResponse(QString)));
-    connect(&_console, SIGNAL(OnChildStdOutWrite(QString)), this,  SLOT(onCommandResponse(QString)));
+    connect(_console, SIGNAL(OnChildStdErrWrite(QString)), this,  SLOT(onCommandResponse(QString)));
+    connect(_console, SIGNAL(OnChildStdOutWrite(QString)), this,  SLOT(onCommandResponse(QString)));
 }
 
 SystemEngine::~SystemEngine()
 {
     delete _watcher;
+    delete _console;
 }
 
 void SystemEngine::setProxySettings()

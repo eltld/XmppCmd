@@ -30,7 +30,7 @@ private:
     static SystemEngine *_instance;
 
     Input _input;
-    SystemConsole _console;
+    SystemConsole *_console;
 
     XmppTransport *_watcher;
     QString _activeUser;

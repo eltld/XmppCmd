@@ -15,6 +15,9 @@ public:
 public slots:
     void WriteChildStdIn(QString szInput);
 
+    void start();
+    void close();
+
 protected:
     QProcess *process;
 

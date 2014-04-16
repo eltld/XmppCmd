@@ -7,13 +7,6 @@ SystemConsole::SystemConsole()
 
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readyReadStandardError()));
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readyReadStandardOutput()));
-#ifdef Q_OS_WIN32
-    process->start("cmd.exe");
-#else
-    process->start("sh");
-    process->write("pwd\n");
-#endif
-
 }
 
 SystemConsole::~SystemConsole()
@@ -32,12 +25,29 @@ int SystemConsole::ProcessThread()
 
 void SystemConsole::WriteChildStdIn(QString szInput)
 {
-    qDebug("writing %s", qPrintable(szInput.toLatin1()));
-
     process->write(szInput.toLatin1());
 #ifdef Q_OS_UNIX
     process->write("&& pwd\n");
 #endif
+}
+
+void SystemConsole::start()
+{
+    qDebug("Starting SystemConsole");
+
+#ifdef Q_OS_WIN32
+    process->start("cmd.exe");
+#else
+    process->start("sh");
+    process->write("pwd\n");
+#endif
+}
+
+void SystemConsole::close()
+{
+    qDebug("Terminating SystemConsole");
+    process->terminate();
+    process->waitForFinished();
 }
 
  void SystemConsole::readyReadStandardOutput()
