@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QString>
 
-#include <Input.hpp>
 #include <SystemConsole.hpp>
 #include <XmppTransport.hpp>
 
@@ -29,7 +28,6 @@ private:
 private:   
     static SystemEngine *_instance;
 
-    Input _input;
     SystemConsole *_console;
 
     XmppTransport *_watcher;

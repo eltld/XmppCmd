@@ -19,14 +19,12 @@ DESTDIR       = ../XmppCmd/bin
 INSTALLS += target
 
 SOURCES += main.cpp \
-    Input.cpp \
     SystemConfig.cpp \
     XmppTransport.cpp \
     SystemConsole.cpp \
     SystemEngine.cpp
 
 HEADERS += \
-    Input.hpp \
     SystemConfig.hpp \
     DataStructures/TransportInfo.hpp \
     XmppTransport.hpp \
