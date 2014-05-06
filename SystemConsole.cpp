@@ -26,9 +26,9 @@ int SystemConsole::ProcessThread()
 void SystemConsole::WriteChildStdIn(QString szInput)
 {
     process->write(szInput.toLatin1());
-//#ifdef Q_OS_UNIX
-//    process->write("&& pwd\n");
-//#endif
+#ifdef Q_OS_UNIX
+    process->write("&& pwd\n");
+#endif
 }
 
 void SystemConsole::start()

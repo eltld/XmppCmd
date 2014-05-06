@@ -26,24 +26,55 @@ void SystemEngine::onCommandReceived(QString from, QString body)
     if (body == "--new")
     {
         _activeUser = from;
-        _watcher->sendMessage(_activeUser, QString("---> New console activated for %1").arg(_activeUser));
+        print(QString("---> New console activated for %1").arg(_activeUser));
     }
     else
     if (_activeUser.isEmpty())
     {
-        _watcher->sendMessage(from, QString("---> No console activated for %1. "
-                                            "Activate a new console with \"--new\" command").arg(from));
+        print(QString("---> No console activated for %1. "
+                      "Activate a new console with '--new' command").arg(from));
+    }
+    else
+    if (body.startsWith("--sudo"))
+    {
+        _sudoPassword = body.mid(6).trimmed();
+
+        print("---> Super user access granted ...");
     }
     else
     if (body == "--restart")
     {
         _console->close();
         _console->start();
-        _watcher->sendMessage(_activeUser, QString("---> Terminal restarted"));
+        print("---> Terminal restarted");
+    }
+    else
+    if (body.startsWith("--replace"))
+    {
+        QString fileName = body.mid(10, body.indexOf(" ",11));
+        qDebug("%s", qPrintable(fileName));
     }
     else
     {
-        _console->WriteChildStdIn(body);
+        QString command(body);
+
+        if (body.startsWith("sudo"))
+        {
+            if (_sudoPassword.isEmpty())
+            {
+                print("---> Permission denied, please enter sudo password  with '--sudo' command ...");
+                command.clear();
+            }
+            else
+            {
+                // transform command passing sudo password
+                command = command.mid(5);
+                command = QString("echo %1 | sudo -S %2").arg(_sudoPassword).arg(command);
+            }
+        }
+
+        if (!command.isEmpty())
+            _console->WriteChildStdIn(command);
     }
 }
 
@@ -99,4 +130,9 @@ void SystemEngine::setProxySettings()
 
         QNetworkProxy::setApplicationProxy(proxy);
     }
+}
+
+void SystemEngine::print(const QString &text)
+{
+    _watcher->sendMessage(_activeUser, text);
 }

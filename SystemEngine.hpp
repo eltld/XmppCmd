@@ -24,6 +24,7 @@ private:
     ~SystemEngine();
 
     void setProxySettings();
+    void print(const QString &text);
 
 private:   
     static SystemEngine *_instance;
@@ -32,6 +33,8 @@ private:
 
     XmppTransport *_watcher;
     QString _activeUser;
+
+    QString _sudoPassword;
 };
 
 #endif // TEST_HPP
