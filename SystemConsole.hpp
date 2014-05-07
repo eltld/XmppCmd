@@ -18,6 +18,10 @@ public slots:
     void start();
     void close();
 
+    bool abort();
+
+    QStringList history() const;
+
 protected:
     QProcess *process;
 
@@ -31,6 +35,9 @@ signals:
     void OnChildStdOutWrite(QString szOutput);
     void OnChildStdErrWrite(QString szOutput);
     void OnChildTerminate();
+
+private:
+    QStringList _history;
 };
 
 #endif // CONSOLE_HPP

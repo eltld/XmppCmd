@@ -27,8 +27,10 @@ void SystemConsole::WriteChildStdIn(QString szInput)
 {
     process->write(szInput.toLatin1());
 #ifdef Q_OS_UNIX
-    process->write("&& pwd\n");
+    process->write("\n");
 #endif
+
+    _history.prepend(szInput);
 }
 
 void SystemConsole::start()
@@ -48,6 +50,18 @@ void SystemConsole::close()
     qDebug("Terminating SystemConsole");
     process->terminate();
     process->waitForFinished();
+}
+
+bool SystemConsole::abort()
+{
+    //killing last command
+    return QProcess::execute(QString("ps aux | grep -i %1 | "
+                              "awk {'print $2'} | xargs kill -9").arg(_history.last()));
+}
+
+QStringList SystemConsole::history() const
+{
+    return _history;
 }
 
  void SystemConsole::readyReadStandardOutput()

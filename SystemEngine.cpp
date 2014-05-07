@@ -61,19 +61,31 @@ void SystemEngine::onCommandReceived(QString from, QString body)
 
     }
     else
-    if (body == "--restart")
-    {
-        _console->close();
-        _console->start();
-        print("---> Terminal restarted");
-    }
-    else
     if (body.startsWith("--edit"))
     {
         QString fileName = body.mid(7);
         print(QString("--> Editing %1, please enter content to replace it ...").arg(fileName));
 
         _fileToEdit = fileName;
+    }
+    else
+    if (body == "--abort")
+    {
+        if (_console->abort())
+            print("---> Last command aborted");
+        else
+            print("<--- No command to abort");
+    }
+    else
+    if (body == "--history")
+    {
+        print(_console->history().join("\n"));
+    }
+    else
+    if (body == "--close")
+    {
+        _console->close();
+        print("---> Terminal closed");
     }
     else
     {
@@ -86,7 +98,8 @@ void SystemEngine::onCommandReceived(QString from, QString body)
 
 void SystemEngine::onCommandResponse(QString body)
 {
-    _watcher->sendMessage(_activeUser, body);
+    print(body);
+    qDebug("%s", qPrintable(body));
 }
 
 SystemEngine::SystemEngine(QObject *parent) :
@@ -140,5 +153,5 @@ void SystemEngine::setProxySettings()
 
 void SystemEngine::print(const QString &text)
 {
-    _watcher->sendMessage(_activeUser, text);
+    _watcher->sendMessage(_activeUser, QString("\n") + text);
 }
