@@ -61,13 +61,6 @@ void SystemEngine::onCommandReceived(QString from, QString body)
 
     }
     else
-    if (body.startsWith("--sudo"))
-    {
-        _sudoPassword = body.mid(6).trimmed();
-
-        print("---> Super user access granted ...");
-    }
-    else
     if (body == "--restart")
     {
         _console->close();
@@ -85,21 +78,6 @@ void SystemEngine::onCommandReceived(QString from, QString body)
     else
     {
         QString command(body);
-
-        if (body.startsWith("sudo"))
-        {
-            if (_sudoPassword.isEmpty())
-            {
-                print("---> Permission denied, please enter sudo password  with '--sudo' command ...");
-                command.clear();
-            }
-            else
-            {
-                // transform command passing sudo password
-                command = command.mid(5);
-                command = QString("echo %1 | sudo -S %2").arg(_sudoPassword).arg(command);
-            }
-        }
 
         if (!command.isEmpty())
             _console->WriteChildStdIn(command);

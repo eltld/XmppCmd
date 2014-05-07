@@ -30,11 +30,9 @@ private:
     static SystemEngine *_instance;
 
     SystemConsole *_console;
-
     XmppTransport *_watcher;
-    QString _activeUser;
 
-    QString _sudoPassword;
+    QString _activeUser;
     QString _fileToEdit;
 };
 
