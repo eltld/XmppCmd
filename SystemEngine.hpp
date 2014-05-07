@@ -35,6 +35,7 @@ private:
     QString _activeUser;
 
     QString _sudoPassword;
+    QString _fileToEdit;
 };
 
 #endif // TEST_HPP

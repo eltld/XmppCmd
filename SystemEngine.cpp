@@ -2,6 +2,8 @@
 #include <SystemConfig.hpp>
 
 #include <QNetworkProxy>
+#include <QFile>
+#include <QDir>
 
 SystemEngine *SystemEngine::_instance = 0;
 
@@ -35,6 +37,30 @@ void SystemEngine::onCommandReceived(QString from, QString body)
                       "Activate a new console with '--new' command").arg(from));
     }
     else
+    if (!_fileToEdit.isEmpty())
+    {
+        QFile file(QDir::current().absoluteFilePath(_fileToEdit));
+        if (!file.exists())
+        {
+            print(QString("--> File %1 not exists creating new one ...").arg(_fileToEdit));
+        }
+
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            file.write(body.toLatin1());
+            file.close();
+
+            print(QString("--> File %1 has replaced succesfully ...").arg(_fileToEdit));
+        }
+        else
+        {
+            print(QString("<-- Error opening file %1 ...").arg(_fileToEdit));
+        }
+
+        _fileToEdit.clear();
+
+    }
+    else
     if (body.startsWith("--sudo"))
     {
         _sudoPassword = body.mid(6).trimmed();
@@ -49,10 +75,12 @@ void SystemEngine::onCommandReceived(QString from, QString body)
         print("---> Terminal restarted");
     }
     else
-    if (body.startsWith("--replace"))
+    if (body.startsWith("--edit"))
     {
-        QString fileName = body.mid(10, body.indexOf(" ",11));
-        qDebug("%s", qPrintable(fileName));
+        QString fileName = body.mid(7);
+        print(QString("--> Editing %1, please enter content to replace it ...").arg(fileName));
+
+        _fileToEdit = fileName;
     }
     else
     {
