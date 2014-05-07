@@ -45,11 +45,14 @@ void XmppTransport::sendMessage(const QString &to, const QString &message)
 
 void XmppTransport::onMessageReceived(const QXmppMessage& message)
 {
-    QString from = message.from();
-    QString body = message.body();
+    if (message.type() == QXmppMessage::Chat)
+    {
+        QString from = message.from();
+        QString body = message.body();
 
-    if (!body.isEmpty())
-        emit messageReceived(from, body);
+        if (!body.isEmpty())
+            emit messageReceived(from, body);
+    }
 }
 
 void XmppTransport::onConnect()

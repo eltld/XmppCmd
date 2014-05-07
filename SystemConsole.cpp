@@ -3,7 +3,7 @@
 SystemConsole::SystemConsole()
 {
     process = new QProcess();
-    process->setProcessChannelMode(QProcess::SeparateChannels);
+    process->setProcessChannelMode(QProcess::ForwardedChannels);
 
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readyReadStandardError()));
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readyReadStandardOutput()));
@@ -12,7 +12,6 @@ SystemConsole::SystemConsole()
 SystemConsole::~SystemConsole()
 {
 }
-
 
 // Thread to monitoring the child process.
 
@@ -23,14 +22,15 @@ int SystemConsole::ProcessThread()
 
 // Function that write to the child stdin.
 
-void SystemConsole::WriteChildStdIn(QString szInput)
+void SystemConsole::write(QString input)
 {
-    process->write(szInput.toLatin1());
-#ifdef Q_OS_UNIX
-    process->write("\n");
-#endif
+    _history.append(input);
 
-    _history.prepend(szInput);
+#ifdef Q_OS_UNIX
+    input.append("&& pwd\n");
+#endif
+    process->write(input.toLatin1());
+
 }
 
 void SystemConsole::start()
@@ -40,8 +40,7 @@ void SystemConsole::start()
 #ifdef Q_OS_WIN32
     process->start("cmd.exe");
 #else
-    process->start("sh");
-    process->write("pwd\n");
+    process->start("/bin/sh");
 #endif
 }
 
@@ -55,8 +54,16 @@ void SystemConsole::close()
 bool SystemConsole::abort()
 {
     //killing last command
-    return QProcess::execute(QString("ps aux | grep -i %1 | "
-                              "awk {'print $2'} | xargs kill -9").arg(_history.last()));
+    QString cmd = QString("ps aux | grep -i '%1' | "
+                          "awk {'print $2'} | xargs kill").arg(_history.last());
+
+    qDebug("-----------> killing command %s", qPrintable(cmd));
+
+    QProcess process;
+    process.start(cmd);
+    process.waitForFinished(-1);
+
+    return true;
 }
 
 QStringList SystemConsole::history() const

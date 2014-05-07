@@ -13,7 +13,7 @@ public:
     ~SystemConsole();
 
 public slots:
-    void WriteChildStdIn(QString szInput);
+    void write(QString szInput);
 
     void start();
     void close();

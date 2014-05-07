@@ -24,17 +24,19 @@ void SystemEngine::destroyInstance()
 }
 
 void SystemEngine::onCommandReceived(QString from, QString body)
-{
+{     
+    qDebug("body: %s", qPrintable(body));
     if (body == "--new")
     {
         _activeUser = from;
-        print(QString("---> New console activated for %1").arg(_activeUser));
+        _watcher->sendMessage(_activeUser, "---> New console activated");
+//        print(QString("---> New console activated for %1").arg(_activeUser));
     }
     else
     if (_activeUser.isEmpty())
     {
-        print(QString("---> No console activated for %1. "
-                      "Activate a new console with '--new' command").arg(from));
+        _watcher->sendMessage(from, "---> No console activated "
+                              "Activate a new console with '--new' command");
     }
     else
     if (!_fileToEdit.isEmpty())
@@ -92,7 +94,7 @@ void SystemEngine::onCommandReceived(QString from, QString body)
         QString command(body);
 
         if (!command.isEmpty())
-            _console->WriteChildStdIn(command);
+            _console->write(command);
     }
 }
 
@@ -153,5 +155,5 @@ void SystemEngine::setProxySettings()
 
 void SystemEngine::print(const QString &text)
 {
-    _watcher->sendMessage(_activeUser, QString("\n") + text);
+    _watcher->sendMessage(_activeUser, text);
 }
